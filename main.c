@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "mpc.h"
 
 // If we are on crappy OS
@@ -110,6 +111,7 @@ lval eval_op(lval x, char *op, lval y) {
         if(strcmp(op, "%") == 0) {
             return y.num == 0 ? lval_err(LERR_DIV_ZERO) : lval_num(x.num % y.num);
         }
+        if(strcmp(op, "^") == 0) { return lval_num( (int) pow((double) x.num, (double) y.num)); }
     } else {
         x = lval_num_to_dec(x);
         y = lval_num_to_dec(y);
@@ -119,6 +121,7 @@ lval eval_op(lval x, char *op, lval y) {
         if(strcmp(op, "/") == 0) { 
             return y.num == 0 ? lval_err(LERR_DIV_ZERO) : lval_dec(x.num_dec / y.num_dec);
         }
+        if(strcmp(op, "^") == 0) { return lval_dec(pow(x.num_dec, y.num_dec)); }
     }
     return lval_err(LERR_BAD_OP);
 }
@@ -175,13 +178,13 @@ int main(int argc, char **argv) {
             "                                                           \
                 number   : /-?[0-9]+/ ;                                 \
                 decimal  : /-?[0-9]+\\.[0-9]+/ ;                       \
-                operator : '+' | '-' | '*' | '/' | '%' ;                \
+                operator : '+' | '-' | '*' | '/' | '%' | '^';                \
                 expr     : <decimal> | <number> | '(' <operator> <expr>+ ')' ;      \
                 krypty   : /^/ <operator> <expr>+ /$/ ;                 \
             ", 
             Number, Decimal, Operator, Expr, Krypty);
 
-    puts("Krypty Version 0.0.4");
+    puts("Krypty Version 0.0.4.2");
     puts("Developed by RuiFPB");
     puts("Check https://www.buildyourownlisp.com to build your own language");
     puts("Press Ctrl+C to Exit\n");
