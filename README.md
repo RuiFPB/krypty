@@ -22,7 +22,7 @@ make CC="[compiler]"
 ## Windows
 ### Mingw
 ```sh
-make LIBS=""
+make LIBEDIT=""
 ```
 (libedit is not supported on Windows, so don't try to use it during compilation)
 
