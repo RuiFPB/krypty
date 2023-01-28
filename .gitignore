@@ -2,3 +2,10 @@
 *
 !*.*
 !*/
+!Makefile
+
+# Ignore window executables
+*.exe
+
+# Ignore zip files
+*.zip
