@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "mpc.h"
 
 // If we are on crappy OS
 #ifdef _WIN32
@@ -28,7 +29,23 @@ void add_history(char *unused) {}
 
 
 int main(int argc, char **argv) {
-    puts("krypty Version 0.0.1");
+    // Create the parsers
+    mpc_parser_t* Number    = mpc_new("number");
+    mpc_parser_t* Operator  = mpc_new("operator");
+    mpc_parser_t* Expr      = mpc_new("expr");
+    mpc_parser_t* Krypty    = mpc_new("krypty");
+
+    mpca_lang(MPCA_LANG_DEFAULT,
+            "                                                           \
+                number   : /-?[0-9]+\\.?[0-9]*/ ;                       \
+                operator : '+' | '-' | '*' | '/' | '%' | \"add\" |      \
+                           \"mul\" | \"div\" | \"mod\" ;                \
+                expr     : <number> | '(' <expr> <operator> <expr> ')' ;\
+                krypty   : /^/ <expr> <operator> <expr> /$/ ;           \
+            ", 
+            Number, Operator, Expr, Krypty);
+
+    puts("krypty Version 0.0.2");
     puts("Developed by RuiFPB");
     puts("Check https://www.buildyourownlisp.com to build your own language");
     puts("Press Ctrl+C to Exit\n");
@@ -40,12 +57,23 @@ int main(int argc, char **argv) {
         // Add input to history
         add_history(input);
 
-        // Echo it back to the user
-        printf("Input from user: %s\n", input);
+        // (Attempt to) Parse the user input
+        mpc_result_t r;
+        if (mpc_parse("<stdin>", input, Krypty, &r)) {
+            // On success print the AST
+            mpc_ast_print(r.output);
+            mpc_ast_delete(r.output);
+        } else {
+            // Print error
+            mpc_err_print(r.error);
+            mpc_err_delete(r.error);
+        }
 
         // Free the input
         free(input);
     }
 
+    // Cleanup all mpc realated stuff
+    mpc_cleanup(4, Number, Operator, Expr, Krypty);
     return 0;
 }
